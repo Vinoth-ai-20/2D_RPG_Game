@@ -3,7 +3,8 @@ package main;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Color;
-import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GamePanel extends JPanel implements Runnable {
     // Screen Settings
@@ -17,9 +18,11 @@ public class GamePanel extends JPanel implements Runnable {
     final int screenHeight = maxScreenRows * tileSize; // 12x64=768 pixels
 
     int FPS = 60;
+    private static final long NANOS_TO_MILLIS = 1000000;
 
     Thread gameThread;
     KeyHandler keyHandler = new KeyHandler();
+    private static final Logger LOGGER = Logger.getLogger(GamePanel.class.getName());
 
     //Player Coordinates
     int playerX = 100;
@@ -56,9 +59,10 @@ public class GamePanel extends JPanel implements Runnable {
             double remainingTime = nextTick - System.nanoTime();
             if (remainingTime > 0) {
                 try {
-                    Thread.sleep((long) remainingTime / 1000000);
+                    Thread.sleep((long) remainingTime / NANOS_TO_MILLIS);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, "Game Thread was Interrupted");
+                    Thread.currentThread().interrupt();
                 }
             }
             nextTick += timePerTick;
