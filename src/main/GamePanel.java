@@ -16,13 +16,23 @@ public class GamePanel extends JPanel implements Runnable {
     final int screenWidth = maxScreenColumns * tileSize; // 16x64=1024 pixels
     final int screenHeight = maxScreenRows * tileSize; // 12x64=768 pixels
 
+    int FPS = 60;
+
     Thread gameThread;
+    KeyHandler keyHandler = new KeyHandler();
+
+    //Player Coordinates
+    int playerX = 100;
+    int playerY = 100;
+    int playerSpeed = 4;
 
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(new Color(18, 18, 18));
         this.setDoubleBuffered(true);
+        this.addKeyListener(keyHandler);
+        this.setFocusable(true);
     }
 
     public void startGame() {
@@ -33,5 +43,53 @@ public class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
 
+        double timePerTick = (double) 1000000000 / FPS;
+        double nextTick = System.nanoTime() + timePerTick;
+
+
+        while (gameThread != null) {
+
+            update();
+
+            repaint();
+
+            double remainingTime = nextTick - System.nanoTime();
+            if (remainingTime > 0) {
+                try {
+                    Thread.sleep((long) remainingTime / 1000000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            nextTick += timePerTick;
+        }
+
+    }
+
+    public void update() {
+        if (keyHandler.upPressed) {
+            playerY -= playerSpeed;
+        }
+        if (keyHandler.downPressed) {
+            playerY += playerSpeed;
+        }
+        if (keyHandler.leftPressed) {
+            playerX -= playerSpeed;
+        }
+        if (keyHandler.rightPressed) {
+            playerX += playerSpeed;
+        }
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(playerX, playerY, tileSize, tileSize);
+        g2d.dispose();
     }
 }
+
+
+
